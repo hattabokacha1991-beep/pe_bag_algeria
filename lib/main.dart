@@ -288,18 +288,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );  
   }
 }
-}
-}
-
-
-}
-
-
-
-
-
-
-
 class GradeScreen extends StatelessWidget {
   final GradeLevel grade;
 
@@ -307,3 +295,79 @@ class GradeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(grade.name),
+        centerTitle: true,
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Card(
+            color: Theme.of(context).colorScheme.primaryContainer,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'التدرج السنوي والميادين:',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(grade.annualPlan),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'الوحدات التعليمية:',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          ),
+          const SizedBox(height: 8),
+          ...grade.units.map((unit) => Card(
+                child: ListTile(
+                  leading: const Icon(Icons.sports_handball, color: Colors.teal),
+                  title: Text(unit),
+                ),
+              )),
+          const SizedBox(height: 16),
+          const Text(
+            'نماذج المذكرات:',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          ),
+          const SizedBox(height: 8),
+          ...grade.memos.map((memo) => Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                child: ExpansionTile(
+                  title: Text('مذكرة ${memo.number}: ${memo.title}',
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: Text(memo.unit),
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('• الهدف الإجرائي: ${memo.objective}'),
+                          const SizedBox(height: 6),
+                          Text('• الوسائل: ${memo.equipment}'),
+                          const SizedBox(height: 6),
+                          Text('• المرحلة التحضيرية: ${memo.warmUp}'),
+                          const SizedBox(height: 6),
+                          Text('• المرحلة الرئيسية: ${memo.mainPart}'),
+                          const SizedBox(height: 6),
+                          Text('• المرحلة الختامية: ${memo.coolDown}'),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              )),
+        ],
+      ),
+    );
+  }
+}
+
