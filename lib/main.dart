@@ -239,8 +239,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String teacherName = 'أستاذ التربية البدنية والرياضية';
   String schoolName = 'المؤسسة التربوية';
-    final levels = const 
+  final List<MemoModel> memos = List<MemoModel>.from(initialMemos);
 
+  final levels = const [
     {'code': 'L1', 'label': 'السنة الأولى'},
     {'code': 'L2', 'label': 'السنة الثانية'},
     {'code': 'L3', 'label': 'السنة الثالثة'},
@@ -322,9 +323,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   decoration: const InputDecoration(labelText: 'السنة الدراسية'),
                   items: levels
                       .map(
-                        (lvl) => DropdownMenuItem(
-                          value: lvl['code'],
-                          child: Text('${lvl['label']} (${lvl['code']})'),
+                        (lvl) => DropdownMenuItem<String>(
+                          value: lvl['code']!,
+                          child: Text('${lvl['label']!} (${lvl['code']!})'),
                         ),
                       )
                       .toList(),
