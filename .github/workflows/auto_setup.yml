@@ -1,4 +1,4 @@
-name: Auto Setup PDF and Word Export
+name: Auto Setup All 140 Memos and PDF Word Export
 
 on:
   workflow_dispatch:
@@ -7,7 +7,7 @@ permissions:
   contents: write
 
 jobs:
-  setup-features:
+  setup-all:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -18,7 +18,7 @@ jobs:
           mkdir -p assets/fonts
           curl -L "https://github.com" -o assets/fonts/Cairo-Regular.ttf
 
-      - name: Update pubspec.yaml and Create export_service.dart
+      - name: Inject 140 Memos, PDF/Word Service, and UI Buttons
         run: |
           python3 - << 'EOF'
           import re
