@@ -1,28 +1,40 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
+import 'package:share_plus/share_plus.dart';
 
 void main() {
-  runApp(const PEAlgeriaApp());
+  runApp(const PeBagAlgeriaApp());
 }
 
-class PEAlgeriaApp extends StatefulWidget {
-  const PEAlgeriaApp({super.key});
+class PeBagAlgeriaApp extends StatefulWidget {
+  const PeBagAlgeriaApp({super.key});
 
   @override
-  State<PEAlgeriaApp> createState() => _PEAlgeriaAppState();
+  State<PeBagAlgeriaApp> createState() => _PeBagAlgeriaAppState();
 }
 
-class _PEAlgeriaAppState extends State<PEAlgeriaApp> {
+class _PeBagAlgeriaAppState extends State<PeBagAlgeriaApp> {
   bool isDarkMode = false;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'حقيبة أستاذ التربية البدنية',
+      title: 'حقيبة التربية البدنية',
+      themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
       theme: ThemeData(
-        colorSchemeSeed: Colors.teal,
-        brightness: isDarkMode ? Brightness.dark : Brightness.light,
         useMaterial3: true,
+        colorSchemeSeed: const Color(0xFF00796B),
+        brightness: Brightness.light,
+      ),
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        colorSchemeSeed: const Color(0xFF00796B),
+        brightness: Brightness.dark,
       ),
       builder: (context, child) {
         return Directionality(
@@ -38,130 +50,27 @@ class _PEAlgeriaAppState extends State<PEAlgeriaApp> {
   }
 }
 
-class LessonMemo {
-  final String number;
-  final String title;
+class MemoModel {
+  final String id;
+  final String level;
   final String unit;
+  final String title;
   final String objective;
-  final String equipment;
   final String warmUp;
   final String mainPart;
   final String coolDown;
 
-  LessonMemo({
-    required this.number,
-    required this.title,
+  const MemoModel({
+    required this.id,
+    required this.level,
     required this.unit,
+    required this.title,
     required this.objective,
-    required this.equipment,
     required this.warmUp,
     required this.mainPart,
     required this.coolDown,
   });
 }
-
-class GradeLevel {
-  final String name;
-  final String shortNum;
-  final String annualPlan;
-  final List<String> units;
-  final List<LessonMemo> memos;
-
-  GradeLevel({
-    required this.name,
-    required this.shortNum,
-    required this.annualPlan,
-    required this.units,
-    required this.memos,
-  });
-}
-
-final List<GradeLevel> curriculumData = [
-  GradeLevel(
-    name: 'السنة الأولى ابتدائي',
-    shortNum: '1 AP',
-    annualPlan:
-        '• الميدان الأول: الوضعية والتنقل (المشي، الجري، التوازن).\n'
-        '• الميدان الثاني: الحركات القاعدية (الرمي، الوثب، التخطي).\n'
-        '• الميدان الثالث: الألعاب الجماعية التمهيدية والتعاون.',
-    units: [
-      'الوحدة 01: التنقلات الأساسية والتوازن',
-      'الوحدة 02: الرمي والتصويب نحو أهداف',
-      'الوحدة 03: الألعاب الجماعية التمهيدية',
-    ],
-    memos: [
-      LessonMemo(
-        number: '01',
-        title: 'المشي والجري في فضاءات مختلفة',
-        unit: 'الوحدة 01: التنقلات الأساسية',
-        objective: 'ضبط إيقاع الجري وتفادي الاصطدام بالزملاء داخل فضاء محدد.',
-        equipment: 'أقماع، حلقات، صافرة، صدريات ملونة.',
-        warmUp: 'لعبة القطار السريع: المشي ثم الهرولة الخفيفة حول الملعب مع تغيير الاتجاه عند الصافرة (10 د).',
-        mainPart: 'ورشة الحواجز المنخفضة: الجري المتعرج بين الأقماع والقفز داخل الحلقات في أفواج (25 د).',
-        coolDown: 'لعبة التمثال: التوقف التام عند الإشارة مع تمارين التنفس العميق (5 د).',
-      ),
-      LessonMemo(
-        number: '02',
-        title: 'التوازن على خط مستقيم',
-        unit: 'الوحدة 01: التنقلات الأساسية',
-        objective: 'الحفاظ على توازن الجسم أثناء التنقل على مسار ضيق.',
-        equipment: 'حبال أرضية، أكياس رملية صغيرة، أقماع.',
-        warmUp: 'تسخين المفاصل مع لعبة تقليد حركة الحيوانات (10 د).',
-        mainPart: 'المشي فوق حبل ممدود على الأرض ذهاباً وإياباً مع حمل كيس رملي فوق الرأس (25 د).',
-        coolDown: 'الجلوس في دائرة وتمارين إطالة خفيفة للرجلين والظهر (5 د).',
-      ),
-    ],
-  ),
-  GradeLevel(
-    name: 'السنة الثانية ابتدائي',
-    shortNum: '2 AP',
-    annualPlan:
-        '• الميدان الأول: تطوير التناسق الحركي والجري السريع.\n'
-        '• الميدان الثاني: الوثب الطويل والعلوي البسيط.\n'
-        '• الميدان الثالث: التمرير والاستقبال باليد ضمن مجموعات.',
-    units: [
-      'الوحدة 01: الجري السريع وتخطي الحواجز',
-      'الوحدة 02: الوثب بأنواعه',
-      'الوحدة 03: التمرير والاستقبال',
-    ],
-    memos: [
-      LessonMemo(
-        number: '01',
-        title: 'الانطلاق السريع عند الإشارة',
-        unit: 'الوحدة 01: الجري السريع',
-        objective: 'الاستجابة السريعة للإشارة السمعية والبصرية والانطلاق في خط مستقيم.',
-        equipment: 'أقماع، صافرة، رايات ملونة.',
-        warmUp: 'الجري الخفيف مع حركات الذراعين وتنبيهات سمعية للتوقف والانطلاق (10 د).',
-        mainPart: 'سباقات قصيرة لمسافة 15 متر من وضعيات انطلاق مختلفة (الوقوف، الجلوس) (25 د).',
-        coolDown: 'المشي البطيء مع تمارين الاسترخاء (5 د).',
-      ),
-    ],
-  ),
-  GradeLevel(
-    name: 'السنة الثالثة ابتدائي',
-    shortNum: '3 AP',
-    annualPlan: 'بناء التصرفات القاعدية في الجري، الرمي، والمنافسات الثنائية وتطبيق قواعد الأمن.',
-    units: ['الوحدة 01: سباقات التتابع', 'الوحدة 02: الرمي لبعيد', 'الوحدة 03: ألعاب المواجهة'],
-    memos: [],
-  ),
-  GradeLevel(
-    name: 'السنة الرابعة ابتدائي',
-    shortNum: '4 AP',
-    annualPlan: 'تنظيم التنقلات الفردية والجماعية وتطبيق قوانين الألعاب المصغرة والتعاون مع الزملاء.',
-    units: ['الوحدة 01: الجري السريع والمقاومة', 'الوحدة 02: ألعاب الكرة المصغرة', 'الوحدة 03: الجمباز الأرضي البسيط'],
-    memos: [],
-  ),
-  GradeLevel(
-    name: 'السنة الخامسة ابتدائي',
-    shortNum: '5 AP',
-    annualPlan: 'التحكم في المهارات الحركية المركبة والتحضير للمنافسات المدرسية والعمل الجماعي المنظم.',
-    units: ['الوحدة 01: ألعاب القوى (جري، وثب، رمي)', 'الوحدة 02: الرياضات الجماعية المصغرة', 'الوحدة 03: التوجيه والتنقل'],
-    memos: [],
-  ),
-];
-
-String teacherName = 'أستاذ التربية البدنية';
-String schoolName = 'المدرسة الابتدائية';
 
 class HomeScreen extends StatefulWidget {
   final bool isDarkMode;
@@ -178,29 +87,82 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  void _editProfile() {
+  String teacherName = 'أستاذ التربية البدنية والرياضية';
+  String schoolName = 'المؤسسة التربوية';
+
+  final List<String> levels = const [
+    'السنة الأولى',
+    'السنة الثانية',
+    'السنة الثالثة',
+    'السنة الرابعة',
+    'السنة الخامسة',
+  ];
+
+  final List<MemoModel> allMemos = const [
+    MemoModel(
+      id: 'M01',
+      level: 'السنة الأولى',
+      unit: 'الجري السريع',
+      title: 'المذكرة 01: الانطلاق السريع ورد الفعل',
+      objective: 'تحسين سرعة الاستجابة الحركية والانطلاق الصحيح عند سماع الإشارة.',
+      warmUp: 'جري خفيف حول الميدان لمدة 5 دقائق + تمارين مرونة المفاصل.',
+      mainPart: 'ألعاب تفاعلية للانطلاق من وضعيات مختلفة (الجلوس، الوقوف، الانبطاح) لمسافة 15م.',
+      coolDown: 'مشي بطيء مع تمارين التنفس والاسترخاء العضلي.',
+    ),
+    MemoModel(
+      id: 'M02',
+      level: 'السنة الأولى',
+      unit: 'القفز والوثب',
+      title: 'المذكرة 02: التوازن والارتقاء بكلتا الرجلين',
+      objective: 'تنسيق حركة الذراعين مع الرجلين أثناء الوثب الأمامي.',
+      warmUp: 'تسخين عام + قفزات خفيفة في المكان.',
+      mainPart: 'اجتياز حواجز منخفضة متتالية والهبوط المتوازن داخل الحلقات.',
+      coolDown: 'تمارين إطالة خفيفة للطرفين السفليين.',
+    ),
+    MemoModel(
+      id: 'M03',
+      level: 'السنة الثانية',
+      unit: 'الألعاب الجماعية',
+      title: 'المذكرة 01: التمرير والاستلام في وضعية الحركة',
+      objective: 'القدرة على تمرير الكرة بدقة نحو الزميل أثناء التنقل.',
+      warmUp: 'تنقلات متنوعة بالكرة وبدون كرة.',
+      mainPart: 'تمارين ثنائية للتمرير والاستلام ثم لعبة مصغرة 4 ضد 4.',
+      coolDown: 'تهدئة عامة وتقييم الحصة مع التلاميذ.',
+    ),
+  ];
+
+  void _editTeacherInfo() {
     final nameCtrl = TextEditingController(text: teacherName);
     final schoolCtrl = TextEditingController(text: schoolName);
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('تخصيص ترويسة المذكرات'),
+        title: const Text('بيانات الأستاذ والمؤسسة'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'اسم ولقب الأستاذ')),
-            const SizedBox(height: 10),
-            TextField(controller: schoolCtrl, decoration: const InputDecoration(labelText: 'اسم المدرسة الابتدائية')),
+            TextField(
+              controller: nameCtrl,
+              decoration: const InputDecoration(labelText: 'اسم الأستاذ'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: schoolCtrl,
+              decoration: const InputDecoration(labelText: 'اسم المؤسسة'),
+            ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('إلغاء')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('إلغاء'),
+          ),
           FilledButton(
             onPressed: () {
               setState(() {
-                if (nameCtrl.text.trim().isNotEmpty) teacherName = nameCtrl.text.trim();
-                if (schoolCtrl.text.trim().isNotEmpty) schoolName = schoolCtrl.text.trim();
+                teacherName = nameCtrl.text.trim();
+                schoolName = schoolCtrl.text.trim();
               });
               Navigator.pop(ctx);
             },
@@ -222,152 +184,269 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(widget.isDarkMode ? Icons.light_mode : Icons.dark_mode),
             onPressed: widget.onToggleTheme,
           ),
-          IconButton(
-            icon: const Icon(Icons.edit_note),
-            onPressed: _editProfile,
-          ),
         ],
-      ),
-      body: Column(
-        children: [
-          Container(
-            margin: const EdgeInsets.all(16),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Row(
-              children: [
-                const CircleAvatar(radius: 26, child: Icon(Icons.sports_soccer, size: 30)),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(teacherName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                      Text(schoolName, style: const TextStyle(fontSize: 13)),
-                    ],
-                  ),
-                ),
-                IconButton(icon: const Icon(Icons.edit), onPressed: _editProfile),
-              ],
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: curriculumData.length,
-              itemBuilder: (context, index) {
-                final grade = curriculumData[index];
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.teal,
-                      foregroundColor: Colors.white,
-                      child: Text(grade.shortNum, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                    ),
-                    title: Text(grade.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
-                    subtitle: Text('${grade.units.length} وحدات تعليمية • ${grade.memos.length} مذكرات'),
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => GradeScreen(grade: grade)),
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );  
-  }
-}
-class GradeScreen extends StatelessWidget {
-  final GradeLevel grade;
-
-  const GradeScreen({super.key, required this.grade});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(grade.name),
-        centerTitle: true,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           Card(
             color: Theme.of(context).colorScheme.primaryContainer,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'التدرج السنوي والميادين:',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(grade.annualPlan),
-                ],
+            child: ListTile(
+              contentPadding: const EdgeInsets.all(16),
+              leading: const CircleAvatar(
+                child: Icon(Icons.sports_soccer),
+              ),
+              title: Text(
+                teacherName,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: Text(schoolName),
+              trailing: IconButton(
+                icon: const Icon(Icons.edit),
+                onPressed: _editTeacherInfo,
               ),
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'الوحدات التعليمية:',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-          ),
-          const SizedBox(height: 8),
-          ...grade.units.map((unit) => Card(
-                child: ListTile(
-                  leading: const Icon(Icons.sports_handball, color: Colors.teal),
-                  title: Text(unit),
+          ...List.generate(levels.length, (index) {
+            final levelName = levels[index];
+            final levelMemos =
+                allMemos.where((m) => m.level == levelName).toList();
+
+            return Card(
+              margin: const EdgeInsets.only(bottom: 12),
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Colors.white,
+                  child: Text('L${index + 1}'),
                 ),
-              )),
-          const SizedBox(height: 16),
-          const Text(
-            'نماذج المذكرات:',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-          ),
-          const SizedBox(height: 8),
-          ...grade.memos.map((memo) => Card(
-                margin: const EdgeInsets.only(bottom: 12),
-                child: ExpansionTile(
-                  title: Text('مذكرة ${memo.number}: ${memo.title}',
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text(memo.unit),
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('• الهدف الإجرائي: ${memo.objective}'),
-                          const SizedBox(height: 6),
-                          Text('• الوسائل: ${memo.equipment}'),
-                          const SizedBox(height: 6),
-                          Text('• المرحلة التحضيرية: ${memo.warmUp}'),
-                          const SizedBox(height: 6),
-                          Text('• المرحلة الرئيسية: ${memo.mainPart}'),
-                          const SizedBox(height: 6),
-                          Text('• المرحلة الختامية: ${memo.coolDown}'),
-                        ],
+                title: Text(
+                  levelName,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text('${levelMemos.length} مذكرات متوفرة'),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => LevelMemosScreen(
+                        levelName: levelName,
+                        memos: levelMemos,
+                        teacherName: teacherName,
+                        schoolName: schoolName,
                       ),
                     ),
-                  ],
-                ),
-              )),
+                  );
+                },
+              ),
+            );
+          }),
         ],
       ),
     );
   }
 }
 
+class LevelMemosScreen extends StatelessWidget {
+  final String levelName;
+  final List<MemoModel> memos;
+  final String teacherName;
+  final String schoolName;
+
+  const LevelMemosScreen({
+    super.key,
+    required this.levelName,
+    required this.memos,
+    required this.teacherName,
+    required this.schoolName,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(levelName)),
+      body: memos.isEmpty
+          ? const Center(child: Text('لا توجد مذكرات مضافة لهذا المستوى بعد'))
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: memos.length,
+              itemBuilder: (context, index) {
+                final memo = memos[index];
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  child: ListTile(
+                    title: Text(memo.title),
+                    subtitle: Text('الوحدة: ${memo.unit}'),
+                    trailing: const Icon(Icons.description_outlined),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => MemoDetailScreen(
+                            memo: memo,
+                            teacherName: teacherName,
+                            schoolName: schoolName,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+    );
+  }
+}
+
+class MemoDetailScreen extends StatelessWidget {
+  final MemoModel memo;
+  final String teacherName;
+  final String schoolName;
+
+  const MemoDetailScreen({
+    super.key,
+    required this.memo,
+    required this.teacherName,
+    required this.schoolName,
+  });
+
+  Future<void> _exportPdf() async {
+    final pdf = pw.Document();
+    final arabicFont = await PdfGoogleFonts.cairoRegular();
+    final arabicBold = await PdfGoogleFonts.cairoBold();
+
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        textDirection: pw.TextDirection.rtl,
+        theme: pw.ThemeData.withFont(base: arabicFont, bold: arabicBold),
+        build: (context) => pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Text('المؤسسة: $schoolName', style: const pw.TextStyle(fontSize: 12)),
+            pw.Text('الأستاذ: $teacherName', style: const pw.TextStyle(fontSize: 12)),
+            pw.Divider(),
+            pw.SizedBox(height: 8),
+            pw.Text(memo.title,
+                style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
+            pw.Text('المستوى: ${memo.level} | الوحدة: ${memo.unit}'),
+            pw.SizedBox(height: 16),
+            _pdfSection('الهدف التعلمي:', memo.objective),
+            _pdfSection('المرحلة التحضيرية:', memo.warmUp),
+            _pdfSection('المرحلة التعليمية (الرئيسية):', memo.mainPart),
+            _pdfSection('المرحلة الختامية:', memo.coolDown),
+          ],
+        ),
+      ),
+    );
+
+    await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+  }
+
+  pw.Widget _pdfSection(String title, String body) {
+    return pw.Container(
+      margin: const pw.EdgeInsets.only(bottom: 12),
+      padding: const pw.EdgeInsets.all(10),
+      decoration: pw.BoxDecoration(
+        border: pw.Border.all(color: PdfColors.grey400),
+        borderRadius: pw.BorderRadius.circular(6),
+      ),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text(title, style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+          pw.SizedBox(height: 4),
+          pw.Text(body),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _exportWordDoc() async {
+    final dir = await getTemporaryDirectory();
+    final file = File('${dir.path}/${memo.id}.doc');
+
+    final htmlContent = '''
+<html dir="rtl" lang="ar">
+<head><meta charset="utf-8"></head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6;">
+  <p><strong>المؤسسة:</strong> $schoolName | <strong>الأستاذ:</strong> $teacherName</p>
+  <hr>
+  <h2>${memo.title}</h2>
+  <p><strong>المستوى:</strong> ${memo.level} — <strong>الوحدة:</strong> ${memo.unit}</p>
+  <table border="1" cellpadding="8" cellspacing="0" width="100%">
+    <tr><th width="25%">المرحلة</th><th>المحتوى البيداغوجي</th></tr>
+    <tr><td><strong>الهدف التعلمي</strong></td><td>${memo.objective}</td></tr>
+    <tr><td><strong>المرحلة التحضيرية</strong></td><td>${memo.warmUp}</td></tr>
+    <tr><td><strong>المرحلة التعليمية</strong></td><td>${memo.mainPart}</td></tr>
+    <tr><td><strong>المرحلة الختامية</strong></td><td>${memo.coolDown}</td></tr>
+  </table>
+</body>
+</html>
+''';
+
+    await file.writeAsString(htmlContent);
+    await Share.shareXFiles([XFile(file.path)], text: memo.title);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(memo.id)),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Text(
+            memo.title,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 6),
+          Text('${memo.level} • ${memo.unit}'),
+          const Divider(height: 24),
+          _buildStageCard('الهدف التعلمي', memo.objective, Icons.flag),
+          _buildStageCard('المرحلة التحضيرية', memo.warmUp, Icons.directions_run),
+          _buildStageCard('المرحلة التعليمية', memo.mainPart, Icons.sports),
+          _buildStageCard('المرحلة الختامية', memo.coolDown, Icons.self_improvement),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: _exportPdf,
+                  icon: const Icon(Icons.picture_as_pdf),
+                  label: const Text('تصدير PDF'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _exportWordDoc,
+                  icon: const Icon(Icons.article),
+                  label: const Text('تصدير Word'),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStageCard(String title, String content, IconData icon) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: ListTile(
+        leading: Icon(icon),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 6),
+          child: Text(content),
+        ),
+      ),
+    );
+  }
+}
