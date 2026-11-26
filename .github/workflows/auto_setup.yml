@@ -1,0 +1,222 @@
+name: Auto Setup PDF and Word Export
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  setup-features:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download Arabic Font (Cairo)
+        run: |
+          mkdir -p assets/fonts
+          curl -L "https://github.com" -o assets/fonts/Cairo-Regular.ttf
+
+      - name: Update pubspec.yaml and Create export_service.dart
+        run: |
+          python3 - << 'EOF'
+          import re
+
+          # 1. تحديث pubspec.yaml
+          with open("pubspec.yaml", "r", encoding="utf-8") as f:
+              pub = f.read()
+
+          if "pdf:" not in pub:
+              pub = re.sub(
+                  r"(dependencies:\s*\n\s*flutter:\s*\n\s*sdk:\s*flutter)",
+                  r"\1\n  pdf: ^3.11.1\n  printing: ^5.13.4\n  path_provider: ^2.1.4\n  share_plus: ^10.1.2",
+                  pub
+              )
+
+          if "assets/fonts/Cairo-Regular.ttf" not in pub:
+              if "uses-material-design: true" in pub:
+                  pub = pub.replace(
+                      "uses-material-design: true",
+                      "uses-material-design: true\n  fonts:\n    - family: Cairo\n      fonts:\n        - asset: assets/fonts/Cairo-Regular.ttf"
+                  )
+              else:
+                  pub += "\nflutter:\n  uses-material-design: true\n  fonts:\n    - family: Cairo\n      fonts:\n        - asset: assets/fonts/Cairo-Regular.ttf\n"
+
+          with open("pubspec.yaml", "w", encoding="utf-8") as f:
+              f.write(pub)
+
+          # 2. إنشاء ملف lib/export_service.dart
+          export_code = """import 'dart:io';
+          import 'package:flutter/services.dart';
+          import 'package:path_provider/path_provider.dart';
+          import 'package:pdf/pdf.dart';
+          import 'package:pdf/widgets.dart' as pw;
+          import 'package:printing/printing.dart';
+          import 'package:share_plus/share_plus.dart';
+          import 'main.dart';
+
+          class ExportService {
+            static Future<void> exportMemoToPdf({
+              required String teacherName,
+              required String schoolName,
+              required String gradeName,
+              required String unit,
+              required String number,
+              required String title,
+              required String objective,
+              required String equipment,
+              required String warmUp,
+              required String mainPart,
+              required String coolDown,
+            }) async {
+              final pdf = pw.Document();
+              final fontData = await rootBundle.load("assets/fonts/Cairo-Regular.ttf");
+              final arabicFont = pw.Font.ttf(fontData);
+
+              pdf.addPage(
+                pw.Page(
+                  pageFormat: PdfPageFormat.a4,
+                  textDirection: pw.TextDirection.rtl,
+                  theme: pw.ThemeData.withFont(base: arabicFont),
+                  build: (pw.Context context) {
+                    return pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                      children: [
+                        pw.Container(
+                          padding: const pw.EdgeInsets.all(10),
+                          decoration: pw.BoxDecoration(border: pw.Border.all()),
+                          child: pw.Row(
+                            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                            children: [
+                              pw.Text('المدرسة: $schoolName'),
+                              pw.Text('المستوى: $gradeName'),
+                              pw.Text('الأستاذ: $teacherName'),
+                            ],
+                          ),
+                        ),
+                        pw.SizedBox(height: 15),
+                        pw.Center(
+                          child: pw.Text(
+                            'مذكرة بيداغوجية رقم: $number - $title',
+                            style: pw.TextStyle(fontSize: 15, fontWeight: pw.FontWeight.bold),
+                          ),
+                        ),
+                        pw.SizedBox(height: 10),
+                        pw.Text('الوحدة التعليمية: $unit'),
+                        pw.Text('الهدف التعلمي: $objective'),
+                        pw.Text('الوسائل المستعملة: $equipment'),
+                        pw.SizedBox(height: 15),
+                        pw.TableHelper.fromTextArray(
+                          context: context,
+                          headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                          cellAlignment: pw.Alignment.centerRight,
+                          headers: ['المحتوى والوضعيات التعليمية', 'مراحل الحصة'],
+                          data: [
+                            [warmUp, 'المرحلة التحضيرية (10 د)'],
+                            [mainPart, 'المرحلة الرئيسية (25 د)'],
+                            [coolDown, 'المرحلة الختامية (05 د)'],
+                          ],
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              );
+
+              await Printing.layoutPdf(
+                onLayout: (PdfPageFormat format) async => pdf.save(),
+                name: 'مذكرة_${number}_$gradeName.pdf',
+              );
+            }
+
+            static Future<void> exportMemoToWord({
+              required String teacherName,
+              required String schoolName,
+              required String gradeName,
+              required String unit,
+              required String number,
+              required String title,
+              required String objective,
+              required String equipment,
+              required String warmUp,
+              required String mainPart,
+              required String coolDown,
+            }) async {
+              final htmlContent = '''
+              <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://w3.org'>
+              <head><meta charset='utf-8'><title>مذكرة بيداغوجية</title>
+              <style>
+                body { font-family: 'Arial', sans-serif; direction: rtl; text-align: right; }
+                table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+                th, td { border: 1px solid #000; padding: 8px; }
+                th { background-color: #e0f2f1; }
+                .header-box { border: 1px solid #000; padding: 10px; margin-bottom: 15px; }
+              </style>
+              </head>
+              <body>
+                <div class="header-box">
+                  <p><strong>المدرسة الابتدائية:</strong> $schoolName &nbsp;&nbsp;|&nbsp;&nbsp; <strong>الأستاذ:</strong> $teacherName &nbsp;&nbsp;|&nbsp;&nbsp; <strong>المستوى:</strong> $gradeName</p>
+                </div>
+                <h2 align="center">مذكرة بيداغوجية رقم: $number</h2>
+                <p><strong>الوحدة التعليمية:</strong> $unit</p>
+                <p><strong>موضوع الحصة:</strong> $title</p>
+                <p><strong>الهدف التعلمي:</strong> $objective</p>
+                <p><strong>الوسائل البيداغوجية:</strong> $equipment</p>
+                <table>
+                  <tr><th width="25%">مراحل الحصة</th><th width="75%">محتوى الإنجاز والوضعيات</th></tr>
+                  <tr><td><strong>المرحلة التحضيرية (10 د)</strong></td><td>$warmUp</td></tr>
+                  <tr><td><strong>المرحلة الرئيسية (25 د)</strong></td><td>$mainPart</td></tr>
+                  <tr><td><strong>المرحلة الختامية (05 د)</strong></td><td>$coolDown</td></tr>
+                </table>
+              </body>
+              </html>
+              ''';
+
+              final directory = await getTemporaryDirectory();
+              final filePath = '${directory.path}/مذكرة_${number}_$gradeName.doc';
+              final file = File(filePath);
+              await file.writeAsString(htmlContent);
+
+              await Share.shareXFiles([XFile(filePath)], text: 'مذكرة التربية البدنية - $title');
+            }
+
+            static Future<void> exportUnitToPdf({
+              required String teacherName,
+              required String schoolName,
+              required String gradeName,
+              required String unitTitle,
+              required String annualPlan,
+              required List<LessonMemo> unitMemos,
+            }) async {
+              final pdf = pw.Document();
+              final fontData = await rootBundle.load("assets/fonts/Cairo-Regular.ttf");
+              final arabicFont = pw.Font.ttf(fontData);
+
+              pdf.addPage(
+                pw.Page(
+                  pageFormat: PdfPageFormat.a4,
+                  textDirection: pw.TextDirection.rtl,
+                  theme: pw.ThemeData.withFont(base: arabicFont),
+                  build: (pw.Context context) {
+                    return pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                      children: [
+                        pw.Container(
+                          padding: const pw.EdgeInsets.all(10),
+                          decoration: pw.BoxDecoration(border: pw.Border.all()),
+                          child: pw.Row(
+                            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                            children: [
+                              pw.Text('المدرسة: $schoolName'),
+                              pw.Text('المستوى: $gradeName'),
+                              pw.Text('الأستاذ: $teacherName'),
+                            ],
+                          ),
+                        ),
+                        pw.SizedBox(height: 15),
+                        pw.Center(
+                          child: pw.Text(
+                            'بطاقة وحدة تعليمية: $unitTitle',
+                            style: pw.TextStyle(fontSize: 15, fontWeight: pw.FontWeight.bold),
+                          ),
