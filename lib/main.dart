@@ -241,7 +241,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String schoolName = 'المؤسسة التربوية';
   final List<MemoModel> memos = List<MemoModel>.from(initialMemos);
 
-  final List> levels = const [
+    final List> levels = const [
     {'code': 'L1', 'label': 'السنة الأولى'},
     {'code': 'L2', 'label': 'السنة الثانية'},
     {'code': 'L3', 'label': 'السنة الثالثة'},
